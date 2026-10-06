@@ -144,6 +144,33 @@ describe('buildScene nodes', () => {
     expect(isbn.type === 'attribute' && isbn.data.isComposite).toBe(false);
   });
 
+  it('flags multivalued and derived attributes, so the canvas can double or dash them', () => {
+    let document = addAttribute(sample(), {
+      id: 'tags',
+      ownerId: 'book',
+      name: 'tags',
+      shape: 'multivalued',
+      offset: { x: 160, y: 140 },
+    });
+    document = addAttribute(document, {
+      id: 'age',
+      ownerId: 'book',
+      name: 'age',
+      shape: 'derived',
+      offset: { x: 300, y: 140 },
+    });
+    const { nodes } = scene(document);
+    const flags = (id: string) => {
+      const node = nodeOf(nodes, id);
+      return node.type === 'attribute'
+        ? { multivalued: node.data.isMultivalued, derived: node.data.isDerived }
+        : undefined;
+    };
+    expect(flags('tags')).toEqual({ multivalued: true, derived: false });
+    expect(flags('age')).toEqual({ multivalued: false, derived: true });
+    expect(flags('isbn')).toEqual({ multivalued: false, derived: false });
+  });
+
   it('carries selection through from the UI store', () => {
     const { nodes } = scene(sample(), { selectedIds: ['book'] });
     expect(nodeOf(nodes, 'book').selected).toBe(true);

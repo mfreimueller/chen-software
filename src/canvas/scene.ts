@@ -54,6 +54,10 @@ export type AttributeNodeData = {
   isForeignKey: boolean;
   /** No marker: a composite, the only attribute that may own parts. */
   isComposite: boolean;
+  /** Double outline, as in the PDF export. */
+  isMultivalued: boolean;
+  /** Dashed outline, as in the PDF export. */
+  isDerived: boolean;
 };
 
 export type AppNode =
@@ -226,6 +230,8 @@ export function buildScene(input: SceneInput): Scene {
           isPrimaryKey: attribute.identifier === 'key',
           isForeignKey: attribute.foreignKey,
           isComposite: attribute.shape === 'composite',
+          isMultivalued: attribute.shape === 'multivalued',
+          isDerived: attribute.shape === 'derived',
         },
       });
 

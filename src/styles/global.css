@@ -94,6 +94,28 @@ body {
   border-radius: 50%;
 }
 
+/* A derived attribute has a dashed outline (SPEC.md §6). */
+.chen-attribute.is-derived {
+  border-style: dashed;
+}
+
+/*
+ * A multivalued attribute has a second outline 4px inside the first, the same
+ * inset the PDF export uses (DOUBLE_OUTLINE_INSET in geometry/shapes.ts).
+ */
+.chen-attribute.is-multivalued::after {
+  border: var(--chen-shape-stroke-width) solid var(--chen-component-stroke);
+  border-radius: 50%;
+  content: '';
+  inset: calc(4px - var(--chen-shape-stroke-width));
+  pointer-events: none;
+  position: absolute;
+}
+
+.chen-shape.is-selected.chen-attribute.is-multivalued::after {
+  border-color: var(--chen-accent);
+}
+
 .chen-relationship {
   background: transparent;
 }

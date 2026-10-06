@@ -15,11 +15,17 @@ export function AttributeNode({
   width = 0,
   height = 0,
 }: AttributeNodeProps): ReactElement {
+  const className = [
+    'chen-shape chen-attribute',
+    data.isMultivalued && 'is-multivalued',
+    data.isDerived && 'is-derived',
+    selected && 'is-selected',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <div
-      className={selected ? 'chen-shape chen-attribute is-selected' : 'chen-shape chen-attribute'}
-      style={componentStyle(data.color)}
-    >
+    <div className={className} style={componentStyle(data.color)}>
       <AttributeMarkers
         size={{ width, height }}
         isPrimaryKey={data.isPrimaryKey}

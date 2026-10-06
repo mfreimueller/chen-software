@@ -202,6 +202,33 @@ describe('Canvas interactions', () => {
     });
   });
 
+  it('marks multivalued and derived attributes so they are drawn doubled and dashed', async () => {
+    const user = userEvent.setup();
+    renderCanvas();
+
+    await user.keyboard('e');
+    await user.keyboard('BOOK{Enter}');
+    const store = useDocumentStore.getState();
+    const owner = model().entities[0]?.id ?? '';
+    for (const [name, shape] of [
+      ['tags', 'multivalued'],
+      ['age', 'derived'],
+      ['isbn', 'simple'],
+    ] as const) {
+      const id = store.addAttributeTo(owner);
+      store.rename(id, name);
+      store.setAttributeShape(id, shape);
+    }
+
+    const shapeOf = async (name: string): Promise<Element | null> =>
+      (await screen.findByText(name)).closest('.chen-attribute');
+    expect(await shapeOf('tags')).toHaveClass('is-multivalued');
+    expect(await shapeOf('tags')).not.toHaveClass('is-derived');
+    expect(await shapeOf('age')).toHaveClass('is-derived');
+    expect(await shapeOf('age')).not.toHaveClass('is-multivalued');
+    expect(await shapeOf('isbn')).not.toHaveClass('is-derived', 'is-multivalued');
+  });
+
   it('refuses a self-relationship and keeps the first pick', async () => {
     const user = userEvent.setup();
     renderCanvas();
