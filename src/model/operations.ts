@@ -159,6 +159,9 @@ export function addAttribute(document: ErDocument, params: AddAttributeParams): 
   if (identifier !== 'none' && ownerKind !== 'entity') {
     throw new ModelError('Only an entity attribute can be a key.');
   }
+  if (identifier === 'key' && (params.shape ?? 'simple') !== 'simple') {
+    throw new ModelError('Only a simple attribute can be a primary key.');
+  }
 
   return produce(document, (draft) => {
     draft.model.attributes.push({
@@ -239,6 +242,9 @@ export function setAttributeShape(document: ErDocument, id: Id, shape: Attribute
     // Silently discarding the parts would delete the student's work.
     throw new ModelError(`Attribute "${id}" still has parts, so it must stay composite.`);
   }
+  if (shape !== 'simple' && attribute.identifier === 'key') {
+    throw new ModelError(`Attribute "${id}" is a primary key, so it must stay simple.`);
+  }
 
   return produce(document, (draft) => {
     const target = findAttribute(draft.model, id);
@@ -259,6 +265,9 @@ export function setAttributeIdentifier(
   }
   if (identifier !== 'none' && attribute.ownerKind !== 'entity') {
     throw new ModelError('Only an entity attribute can be a key.');
+  }
+  if (identifier === 'key' && attribute.shape !== 'simple') {
+    throw new ModelError(`Attribute "${id}" is not simple, so it cannot be a primary key.`);
   }
 
   return produce(document, (draft) => {

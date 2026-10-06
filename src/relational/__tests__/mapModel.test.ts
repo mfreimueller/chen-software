@@ -31,14 +31,33 @@ describe('entities', () => {
     expect(table(schema, 'FLIGHT').primaryKey).toEqual(['airline', 'number']);
   });
 
-  it('flattens a composite into its parts, keyed as a whole when it is a key', () => {
+  it('flattens a composite into its parts', () => {
     const schema = mapModel(
       new Diagram()
         .entity('PERSON')
-        .attribute('name', 'PERSON', { shape: 'composite', identifier: 'key' })
+        .key('id', 'PERSON')
+        .attribute('name', 'PERSON', { shape: 'composite' })
         .attribute('first', 'name')
         .attribute('last', 'name').model,
     );
+    expect(columnNames(table(schema, 'PERSON'))).toEqual(['id', 'first', 'last']);
+  });
+
+  it('still keys a composite as a whole when an older file marks it as a key', () => {
+    // The editor no longer lets a composite be a primary key, but a diagram
+    // saved before that rule can still hold one, and the export must cope.
+    const { entities, attributes, relationships } = new Diagram()
+      .entity('PERSON')
+      .attribute('name', 'PERSON', { shape: 'composite' })
+      .attribute('first', 'name')
+      .attribute('last', 'name').model;
+    const schema = mapModel({
+      entities,
+      relationships,
+      attributes: attributes.map((attribute) =>
+        attribute.id === 'name' ? { ...attribute, identifier: 'key' } : attribute,
+      ),
+    });
     const person = table(schema, 'PERSON');
     expect(columnNames(person)).toEqual(['first', 'last']);
     expect(person.primaryKey).toEqual(['first', 'last']);

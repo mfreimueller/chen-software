@@ -223,7 +223,9 @@ describe('addAttribute', () => {
   });
 
   it('accepts a part on a composite attribute', () => {
-    let document = setAttributeShape(sample(), 'pubName', 'composite');
+    // A primary key must stay simple, so it stops being one before it is composite.
+    let document = setAttributeIdentifier(sample(), 'pubName', 'none');
+    document = setAttributeShape(document, 'pubName', 'composite');
     document = addAttribute(document, {
       id: 'first',
       ownerId: 'pubName',

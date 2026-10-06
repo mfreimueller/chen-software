@@ -131,13 +131,48 @@ describe('composite attributes', () => {
 });
 
 describe('attribute shape, identifier and foreign key', () => {
-  it('keeps the two axes independent, so a composite can be a key', () => {
-    let document = setAttributeIdentifier(sample(), 'name', 'key');
-    document = setAttributeForeignKey(document, 'name', true);
+  it('keeps a foreign key independent of the shape', () => {
+    const document = setAttributeForeignKey(sample(), 'name', true);
     const attribute = findAttribute(document.model, 'name');
     expect(attribute?.shape).toBe('composite');
-    expect(attribute?.identifier).toBe('key');
     expect(attribute?.foreignKey).toBe(true);
+  });
+
+  it.each(['composite', 'multivalued', 'derived'] as const)(
+    'refuses a %s attribute as a primary key',
+    (shape) => {
+      const document = deleteElements(sample(), ['first', 'last']);
+      const shaped = setAttributeShape(document, 'name', shape);
+      expect(() => setAttributeIdentifier(shaped, 'name', 'key')).toThrow(ModelError);
+    },
+  );
+
+  it.each(['composite', 'multivalued', 'derived'] as const)(
+    'refuses to make a primary key %s',
+    (shape) => {
+      const document = deleteElements(sample(), ['first', 'last']);
+      const simple = setAttributeShape(document, 'name', 'simple');
+      const keyed = setAttributeIdentifier(simple, 'name', 'key');
+      expect(() => setAttributeShape(keyed, 'name', shape)).toThrow(ModelError);
+    },
+  );
+
+  it('still allows a partial key on a non-simple attribute', () => {
+    const document = setAttributeIdentifier(sample(), 'name', 'partial');
+    expect(findAttribute(document.model, 'name')?.identifier).toBe('partial');
+  });
+
+  it('refuses to create a non-simple attribute that is already a primary key', () => {
+    expect(() =>
+      addAttribute(sample(), {
+        id: 'code',
+        ownerId: 'dept',
+        name: 'code',
+        shape: 'multivalued',
+        identifier: 'key',
+        offset: { x: 0, y: 0 },
+      }),
+    ).toThrow(ModelError);
   });
 
   it('marks and unmarks a foreign key', () => {

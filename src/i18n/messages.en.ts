@@ -180,6 +180,9 @@ export const messages = {
     foreignKey: 'Foreign key',
     columnDetails: 'Column details…',
     keysAreEntityOnly: 'Only an entity attribute can be a key.',
+    primaryKeyNeedsSimple:
+      'A primary key must be a simple attribute. Make it simple before making it a key.',
+    primaryKeyHasShape: 'A primary key must stay simple. Remove the key first to change the shape.',
     compositeHasParts: 'Delete its parts before changing the shape.',
   },
 

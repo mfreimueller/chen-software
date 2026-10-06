@@ -184,6 +184,36 @@ describe('ComponentMenu', () => {
     expect(findAttribute(store().document.model, attribute)?.shape).toBe('composite');
   });
 
+  it('refuses a primary key on a non-simple attribute, and says why', async () => {
+    const user = userEvent.setup();
+    const { attribute } = seed();
+    act(() => {
+      store().setAttributeShape(attribute, 'multivalued');
+    });
+
+    openOn(attribute);
+    renderMenu();
+    await user.click(screen.getByRole('menuitemradio', { name: 'Primary key' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent(/must be a simple attribute/i);
+    expect(findAttribute(store().document.model, attribute)?.identifier).toBe('none');
+  });
+
+  it('refuses to change the shape of a primary key, and says why', async () => {
+    const user = userEvent.setup();
+    const { attribute } = seed();
+    act(() => {
+      store().setAttributeIdentifier(attribute, 'key');
+    });
+
+    openOn(attribute);
+    renderMenu();
+    await user.click(screen.getByRole('menuitemradio', { name: 'Derived' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent(/must stay simple/i);
+    expect(findAttribute(store().document.model, attribute)?.shape).toBe('simple');
+  });
+
   it('sets a colour and clears it again', async () => {
     const user = userEvent.setup();
     const { entity } = seed();

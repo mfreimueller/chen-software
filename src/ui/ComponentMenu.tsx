@@ -113,6 +113,10 @@ function AttributeSection({ document, elementId, close }: SectionProps): ReactEl
                 notify(messages.menu.compositeHasParts);
                 return;
               }
+              if (shape !== 'simple' && attribute.identifier === 'key') {
+                notify(messages.menu.primaryKeyHasShape);
+                return;
+              }
               setAttributeShape(elementId, shape);
               close();
             }}
@@ -129,6 +133,10 @@ function AttributeSection({ document, elementId, close }: SectionProps): ReactEl
             onSelect={() => {
               if (identifier !== 'none' && !canBeKey) {
                 notify(messages.menu.keysAreEntityOnly);
+                return;
+              }
+              if (identifier === 'key' && attribute.shape !== 'simple') {
+                notify(messages.menu.primaryKeyNeedsSimple);
                 return;
               }
               setAttributeIdentifier(elementId, identifier);
